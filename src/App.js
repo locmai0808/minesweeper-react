@@ -11,7 +11,7 @@ class App extends Component {
           <img src={logo} className='App-logo' alt='logo' />
           <span>MineSweeper</span>
         </header>
-        <Board height={8} width={8} mines={10} />
+        <Board heigth={8} width={8} mines={10} />
       </div>
     );
   }
