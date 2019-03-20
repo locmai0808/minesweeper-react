@@ -1,36 +1,39 @@
 import React, { Component } from 'react';
+import Cell from './Cell.jsx';
 
 export class Board extends Component {
   constructor(props) {
     super(props);
+    this.progress = 0;
     this.state = {
       board: this.fillBoard(props.heigth, props.width, props.mines),
+      status: 'Good luck!',
       heigth: props.heigth,
       width: props.width,
-      mines: props.mines
+      mines: props.mines,
+      size: props.heigth * props.width
     };
   }
 
   fillBoard(h, w, m) {
-    let board = [];
-    let minesLocation = [];
     let size = h * w;
-    board = this.initBoard(size);
+    let board = this.initBoard(size);
     board = this.addMines(board, size, m);
-    minesLocation = board[1];
+    let minesLocation = board[1];
     board = board[0];
-    //board = this.addMoves(board, size, w);
     board = this.addNeighbor(board, size, w, minesLocation);
     return board;
   }
 
   newGame = () => {
+    this.progress = 0;
     this.setState({
       board: this.fillBoard(
         this.state.heigth,
         this.state.width,
         this.state.mines
-      )
+      ),
+      status: 'Good luck!'
     });
   };
 
@@ -38,7 +41,7 @@ export class Board extends Component {
   initBoard = size => {
     let board = [];
     for (let i = 0; i < size; i++) {
-      board = [...board, { mine: 0, clicked: 0, flagged: 0, val: 0 }];
+      board = [...board, { mine: 0, revealed: 0, flagged: 0, val: 0 }];
     }
     return board;
   };
@@ -51,6 +54,7 @@ export class Board extends Component {
       let index = this.randomNumber(size);
       if (!board[index].mine) {
         board[index].mine = 1;
+        board[index].val = -1;
         j = [...j, index];
         i++;
       }
@@ -61,108 +65,121 @@ export class Board extends Component {
   // Fill board with moves
   addNeighbor = (board, size, w, minesLocation) => {
     minesLocation.forEach(i => {
-      if (i >= w && i < size - w) {
+      if (i >= w) {
+        // top left
+        if (
+          i - w - 1 >= 0 &&
+          (i - w - 1) % w !== w - 1 &&
+          !board[i - w - 1].mine
+        )
+          board[i - w - 1].val++;
         // top
-        board[i - w].val++;
-        // btm
-        board[i + w].val++;
-        if (i % w === 0) {
+        if (!board[i - w].mine) board[i - w].val++;
+        // top right
+        if ((i - w + 1) % w !== 0 && !board[i - w + 1].mine)
           board[i - w + 1].val++;
-          board[i + 1].val++;
-          board[i + w + 1].val++;
-        } else if (i % w === w - 1) {
-          board[i - w - 1].val++;
-          board[i - 1].val++;
-          board[i + w - 1].val++;
-        } else {
-          // top left
-          board[i - w - 1].val++;
-          // top right
-          board[i - w + 1].val++;
-          // left
-          board[i - 1].val++;
-          // right
-          board[i + 1].val++;
-          // btm left
-          board[i + w - 1].val++;
-          // btm right
-          board[i + w + 1].val++;
-        }
-      } else if (i < w) {
-        board[i + w].val++;
-        if (i === 0) {
-          board[i + 1].val++;
-          board[i + w + 1].val++;
-        } else if (i === w - 1) {
-          board[i - 1].val++;
-          board[i + w - 1].val++;
-        } else {
-          board[i - 1].val++;
-          board[i + 1].val++;
-          board[i + w - 1].val++;
-          board[i + w + 1].val++;
-        }
-      } else if (i >= size - w) {
-        board[i - w].val++;
-        if (i === size - w) {
-          board[i + 1].val++;
-          board[i - w + 1].val++;
-        } else if (i === size - 1) {
-          board[i - 1].val++;
-          board[i - w - 1].val++;
-        } else {
-          board[i - 1].val++;
-          board[i + 1].val++;
-          board[i - w + 1].val++;
-          board[i - w - 1].val++;
-        }
       }
+      if (i < size - w) {
+        // btm left
+        if ((i + w - 1) % w !== w - 1 && !board[i + w - 1].mine)
+          board[i + w - 1].val++;
+        // btm
+        if (!board[i + w].mine) board[i + w].val++;
+        // btm right
+        if ((i + w + 1) % w !== 0 && !board[i + w + 1].mine)
+          board[i + w + 1].val++;
+      }
+      // left
+      if (i - 1 >= 0 && (i - 1) % w !== w - 1 && !board[i - 1].mine)
+        board[i - 1].val++;
+      // right
+      if (i + 1 < size && (i + 1) % w !== 0 && !board[i + 1].mine)
+        board[i + 1].val++;
     });
     return board;
   };
 
-  /* Fill board with moves
-  addMoves = (board, size, w) => {
-    for (let i = 0; i < size; i++) {
-      if (board[i].mine) continue;
-      board[i] = this.checkCell(board, i, size, w);
-    }
-    return board;
+  randomNumber = size => Math.floor(Math.random() * size);
+
+  boom = () => {
+    let copy = [...this.state.board];
+    copy.forEach(cell => {
+      cell.revealed = 1;
+    });
+    this.setState({
+      board: copy,
+      status: '😢 You lost 😢'
+    });
   };
 
-  checkCell = (board, i, size, w) => {
-    // top
-    if (i >= w && board[i - w].mine) board[i].val++;
-    // bottom
-    if (i < size - w && board[i + w].mine) board[i].val++;
-
-    if (i % w < w - 1) {
-      // top right
-      if (i >= w && board[i - w + 1].mine) board[i].val++;
-      // bottom right
-      if (i < size - w && board[i + w + 1].mine) board[i].val++;
-      // right
-      if (board[i + 1].mine) board[i].val++;
+  reveal = (index, { mine, revealed, flagged, val }) => {
+    if (revealed || flagged) return;
+    if (mine) {
+      return this.boom();
     }
-    if (i % w > 0) {
+    if (val === 0) {
+      this.floodFill(index);
+    } else {
+      let copy = [...this.state.board];
+      this.progress++;
+      copy[index].revealed = 1;
+      if (this.progress === this.state.size - this.state.mines) {
+        copy.forEach(cell => {
+          cell.revealed = 1;
+        });
+        return this.setState({
+          board: copy,
+          status: '🎉 YOU WON 🎉'
+        });
+      }
+      this.setState({
+        board: copy
+      });
+    }
+  };
+
+  floodFill = i => {
+    let board = [...this.state.board];
+    if (board[i].mine || board[i].revealed) return;
+    board[i].revealed = 1;
+    this.progress++;
+    this.setState({
+      board: board
+    });
+    let w = this.state.width;
+    let size = this.state.size;
+    if (i >= w) {
       // top left
-      if (i > w && board[i - w - 1].mine) board[i].val++;
-      // bottom left
-      if (i < size - w && board[i + w - 1].mine) board[i].val++;
-      // left
-      if (board[i - 1].mine) board[i].val++;
+      if (i - w - 1 >= 0 && (i - w - 1) % w !== w - 1)
+        this.reveal(i - w - 1, board[i - w - 1]);
+      // top
+      this.reveal(i - w, board[i - w]);
+      // top right
+      if ((i - w + 1) % w !== 0) this.reveal(i - w + 1, board[i - w + 1]);
     }
-    return board[i];
-  }; */
-
-  randomNumber = size => Math.floor(Math.random() * size);
+    if (i < size - w) {
+      // btm left
+      if ((i + w - 1) % w !== w - 1) this.reveal(i + w - 1, board[i + w - 1]);
+      // btm
+      this.reveal(i + w, board[i + w]);
+      // btm right
+      if ((i + w + 1) % w !== 0) this.reveal(i + w + 1, board[i + w + 1]);
+    }
+    // left
+    if (i - 1 >= 0 && (i - 1) % w !== w - 1) this.reveal(i - 1, board[i - 1]);
+    // right
+    if (i + 1 < size && (i + 1) % w !== 0) this.reveal(i + 1, board[i + 1]);
+  };
 
   renderBoard = () => {
     return this.state.board.map((props, index) => {
       return (
-        <div className='cell' key={index}>
-          {props.mine === 1 ? '💣' : props.val}
-        </div>
+        <Cell
+          key={index}
+          onClick={() => this.reveal(index, props)}
+          onContextMenu={e => this.rightClick(index, props, e)}
+          cell={props}
+        />
       );
     });
   };
@@ -170,11 +187,15 @@ export class Board extends Component {
   render() {
     return (
       <div>
-        <button className='btn btn-success' onClick={this.newGame}>
-          New Game
-        </button>
-        <br />
-        <br />
+        <div className='game-header'>
+          {this.state.status}
+          <br />
+          <br />
+          <button className='btn btn-success' onClick={this.newGame}>
+            New Game
+          </button>
+          <br />
+        </div>
         {this.renderBoard()}
       </div>
     );

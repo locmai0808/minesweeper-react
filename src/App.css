@@ -17,6 +17,14 @@ body {
   font-weight: bold;
 }
 
+.is-flag {
+  color: red;
+}
+
+.revealed {
+  background: rgb(255, 123, 0);
+}
+
 .game {
   max-width: 416px;
   margin: 0 auto;
@@ -39,6 +47,15 @@ body {
   justify-content: center;
   font-size: 50px;
   margin-bottom: 20px;
+  color: #FEBD16;
+}
+
+.game-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
   color: #FEBD16;
 }
 
