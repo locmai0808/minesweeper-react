@@ -9,13 +9,29 @@ export class Cell extends Component {
   }
 
   render() {
-    const { cell, onClick, rightClick } = this.props;
+    const { cell, onClick, onContextMenu } = this.props;
+    const numClasses = [
+      ' one',
+      ' two',
+      ' three',
+      ' four',
+      ' five',
+      ' six',
+      ' seven',
+      ' eight'
+    ];
     let className =
       'cell' +
       (cell.revealed ? ' revealed' : '') +
-      (cell.flagged ? ' is-flag' : '');
+      (cell.revealed && cell.val ? numClasses[cell.val - 1] : '') +
+      (cell.flagged ? ' flagged' : '') +
+      (cell.boom ? ' boom' : '');
     return (
-      <div onClick={onClick} className={className} onContextMenu={rightClick}>
+      <div
+        onClick={onClick}
+        className={className}
+        onContextMenu={onContextMenu}
+      >
         {this.getValue()}
       </div>
     );

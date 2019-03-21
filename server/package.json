@@ -1,0 +1,22 @@
+{
+  "name": "minesweeper-server",
+  "version": "1.0.0",
+  "description": "minesweeper server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.js",
+    "server": "nodemon index.js"
+  },
+  "author": "Loc Mai",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "sqlite3": "^4.0.6"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
+}

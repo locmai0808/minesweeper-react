@@ -1,18 +1,22 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import Board from './components/Board';
+import NavBar from './components/NavBar';
+import {Container, Col, Row} from 'react-bootstrap';
 import './App.css';
-import logo from './logo.png';
 
 class App extends Component {
   render() {
     return (
-      <div className='game'>
-        <header className='App-header'>
-          <img src={logo} className='App-logo' alt='logo' />
-          <span>MineSweeper</span>
-        </header>
-        <Board heigth={8} width={8} mines={10} />
-      </div>
+      <>
+        <NavBar />
+        <Container style={{height: '100vh'}}>
+          <Row className="h-100 align-items-center text-center">
+            <Col md={12}>
+              <Board height={8} width={8} mines={10} level={'Easy'} />
+            </Col>
+          </Row>
+        </Container>
+      </>
     );
   }
 }
